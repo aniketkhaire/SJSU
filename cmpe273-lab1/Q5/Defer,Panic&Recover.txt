@@ -1,0 +1,46 @@
+Q-	What are defer, panic and recover? How do you recover from a run-time panic? (Page-91)
+
+A defer statement pushes the current function call onto a list, executes the surrounding functions, and then returns back to execute the defered functions in the list. It is commonly used to perform clean-up actions.
+For eg, consider the code below which copies one file to another.
+
+func copyFies(destination, source string) (x int64, err error){
+	//open source file
+	src.err := os.Open(source)
+	if err != nil{
+		return					//return if error occured
+	}
+	//open/create destination file 
+	dst.err := os.Open(destination)
+	if err != nil{
+		return					//return if error occured
+	}
+
+	x.err = io.Copy(dst,src)	//copy data
+	dst.close()					//close destination file
+	src.close()					//close source file
+} 
+
+The above code runs fine with normal operations. But there exists a bug. When there is an error while opening/creating the destination file, the function returns directly without closing the source file. In such cases, the defer statement comes into picture. The defer statements are executed (in Last In First Out fashion) after all its surrounding functions are executed.
+
+func copyFies(destination, source string) (x int64, err error){
+	//open source file
+	src.err := os.Open(source)
+	if err != nil{
+		return					//return if error occured
+	}
+	src.close()					//close source file
+
+	//open/create destination file 
+	dst.err := os.Open(destination)
+	if err != nil{
+		return					//return if error occured
+	}
+	defer 	dst.close()			//deferred close destination file
+	x.err = io.Copy(dst,src)	//copy data
+} 
+
+Panic is a built-in function which stops the normal flow of control and begins panicking. After a panic is called, the normal flow of control stops, all the deferred functions are called and the control goes back to the caller function. The caller function, then behaves like a call to the panic and the process repeats until all the functins in the stack have returned, at which point the program crashes. Panic can be called explicitly or occurs as a result of a runtime error.
+
+Recover is a built-in function, which s used to regain the control of a panicking function. The recover funtion is only useful, when used with defers functions as only defered functions are executed after a panic. During panic, the call to recover function will capture the value given to panic and resume the normal execution of the goroutine. A recover will return "nil" when called during normal execution.
+
+To recover form a runtime panic, write the code for recover in defered state. If no panic occurs, the recover function returns "nil". If panic has occured, the function would return the value provided to the panic. 
