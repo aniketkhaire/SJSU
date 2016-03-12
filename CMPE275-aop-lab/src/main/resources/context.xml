@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="tweetStats" class="edu.sjsu.cmpe275.lab1.TweetStatsImpl" scope="singleton"/>
+    <bean id="tweetService" class="edu.sjsu.cmpe275.lab1.TweetServiceImpl" scope="singleton"/>
+
+    <bean id="retryAndDoStats" class="edu.sjsu.cmpe275.lab1.RetryAndDoStats" scope="singleton"/>
+
+    <bean id="tweetServiceProxy"
+          class="org.springframework.aop.framework.ProxyFactoryBean">
+
+        <property name="target" ref="tweetService"/>
+
+        <property name="interceptorNames">
+            <list>
+                <value>retryAndDoStats</value>
+            </list>
+        </property>
+    </bean>
+</beans>
